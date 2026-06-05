@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cancel Processing Order — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .orders { display: flex; flex-direction: column; gap: 10px; }
+    .order-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px; border: 1px solid var(--color-border); border-radius: 6px;
+    }
+    .status { font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .status-processing { background: #fef3c7; color: #92400e; }
+    .status-shipped { background: #dbeafe; color: #1e40af; }
+    .status-delivered { background: #d1fae5; color: #065f46; }
+    .status-cancelled { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 3</span>
+    <h1>Cancel Processing Order</h1>
+    <p class="task-description">Find the order still being processed and cancel it.</p>
+  </header>
+
+  <main class="card">
+    <h2 style="font-size:1rem; margin-bottom:12px;">Your Orders</h2>
+    <div id="orders" class="orders"></div>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    var orders = [
+      { id: 'ORD-001', status: 'Shipped', name: 'Wireless Mouse' },
+      { id: 'ORD-002', status: 'Processing', name: 'USB-C Hub' },
+      { id: 'ORD-003', status: 'Delivered', name: 'Desk Lamp' },
+    ];
+
+    function render() {
+      var container = document.getElementById('orders');
+      container.innerHTML = '';
+      orders.forEach(function(o) {
+        var statusClass = 'status-' + o.status.toLowerCase();
+        var canCancel = o.status === 'Processing';
+        var div = document.createElement('div');
+        div.className = 'order-row';
+        div.innerHTML = '<div><strong>' + o.id + '</strong> — ' + o.name +
+          '<br><span class="status ' + statusClass + '">' + o.status + '</span></div>' +
+          (canCancel ? '<button class="btn btn-primary btn-sm" data-id="' + o.id + '">Cancel Order</button>' : '');
+        container.appendChild(div);
+      });
+      container.querySelectorAll('.btn-sm').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          playground.submit('/api/l3-conditional-action/cancel', { orderId: this.dataset.id }, function(resp) {
+            if (resp.success) {
+              orders = orders.map(function(o) {
+                return o.id === resp.order.id ? resp.order : o;
+              });
+              render();
+              playground.showResult('Order ' + resp.order.id + ' cancelled.', true);
+            }
+          });
+        });
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>

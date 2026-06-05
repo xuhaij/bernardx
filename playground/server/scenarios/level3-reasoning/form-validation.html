@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Valid Account — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .rules { font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 16px; padding: 12px; background: var(--color-bg); border-radius: 6px; }
+    .rules li { margin-bottom: 4px; }
+    .error-list { color: var(--color-error); font-size: 0.85rem; margin-top: 8px; }
+    .error-list li { margin-bottom: 2px; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 3</span>
+    <h1>Create Valid Account</h1>
+    <p class="task-description">Register a new account that passes all validation rules.</p>
+  </header>
+
+  <main class="card">
+    <div class="rules">
+      <strong>Password Requirements:</strong>
+      <ul style="margin-top:4px; padding-left:20px;">
+        <li>At least 8 characters</li>
+        <li>At least one uppercase letter</li>
+        <li>At least one digit</li>
+        <li>At least one special character (!@#$%^&*)</li>
+      </ul>
+    </div>
+
+    <form id="form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter username">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter password">
+      </div>
+      <button type="submit" id="submit-btn" class="btn btn-primary">Register</button>
+    </form>
+    <div id="result" class="result" style="display:none;"></div>
+    <ul id="error-list" class="error-list" style="display:none;"></ul>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var data = {
+        username: document.getElementById('username').value.trim(),
+        password: document.getElementById('password').value
+      };
+      playground.submit('/api/l3-form-validation/register', data, function(resp) {
+        if (resp.success) {
+          playground.showResult(resp.message, true);
+          document.getElementById('error-list').style.display = 'none';
+        } else {
+          playground.showResult('Validation failed.', false);
+          var list = document.getElementById('error-list');
+          list.innerHTML = '';
+          resp.errors.forEach(function(err) {
+            var li = document.createElement('li');
+            li.textContent = err;
+            list.appendChild(li);
+          });
+          list.style.display = 'block';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

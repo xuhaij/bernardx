@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Handle Server Errors — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .server-status { padding: 8px 12px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 16px; }
+    .status-ok { background: #d1fae5; color: #065f46; }
+    .status-error { background: #fee2e2; color: #991b1b; }
+    .retry-info { font-size: 0.85rem; color: var(--color-text-muted); margin-top: 8px; }
+    .error-list { color: var(--color-error); font-size: 0.85rem; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 5</span>
+    <h1>Handle Server Errors</h1>
+    <p class="task-description">Submit the feedback form. The server may fail — keep retrying until it succeeds.</p>
+  </header>
+
+  <main class="card">
+    <div id="server-status" class="server-status status-ok">Server Status: Online</div>
+    <form id="form">
+      <div class="form-group">
+        <label for="feedback">Feedback</label>
+        <textarea id="feedback" name="feedback" rows="3" placeholder="Enter your feedback"></textarea>
+      </div>
+      <button type="submit" id="submit-btn" class="btn btn-primary">Submit Feedback</button>
+    </form>
+    <div id="retry-info" class="retry-info" style="display:none;"></div>
+    <ul id="error-list" class="error-list" style="display:none;"></ul>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var statusEl = document.getElementById('server-status');
+      var retryEl = document.getElementById('retry-info');
+
+      playground.submit('/api/l5-server-errors/submit', {
+        feedback: document.getElementById('feedback').value,
+      }, function(resp) {
+        if (resp.success) {
+          statusEl.className = 'server-status status-ok';
+          statusEl.textContent = 'Server Status: Online';
+          playground.showResult(resp.message, true);
+          retryEl.style.display = 'none';
+          document.getElementById('error-list').style.display = 'none';
+        } else {
+          statusEl.className = 'server-status status-error';
+          statusEl.textContent = 'Server Status: Error — ' + (resp.error || 'Unknown error');
+          playground.showResult(resp.message, false);
+          retryEl.textContent = 'The server returned an error. Please try again.';
+          retryEl.style.display = 'block';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enable Auto-save — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+    }
+    .checkbox-group label {
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 1</span>
+    <h1>Enable Auto-save</h1>
+    <p class="task-description">Configure your preferences below.</p>
+  </header>
+
+  <main class="card">
+    <h2 style="font-size:1rem; margin-bottom:12px; color:var(--color-text-muted);">Settings</h2>
+    <div class="checkbox-group">
+      <input type="checkbox" id="autosave" name="autosave">
+      <label for="autosave">Auto-save</label>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="notifications" name="notifications">
+      <label for="notifications">Notifications</label>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="darkmode" name="darkmode">
+      <label for="darkmode">Dark Mode</label>
+    </div>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.getElementById('autosave').addEventListener('change', function() {
+      var checked = this.checked;
+      playground.submit('/api/l1-toggle-checkbox/toggle', { checked: checked }, function(resp) {
+        if (resp.success) {
+          playground.showResult(resp.message, true);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

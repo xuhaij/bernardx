@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Best Value Product — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .products { display: flex; flex-direction: column; gap: 12px; }
+    .product-card {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px; border: 1px solid var(--color-border); border-radius: 6px;
+      background: var(--color-surface);
+    }
+    .product-card.best-value { border-color: var(--color-success); border-width: 2px; }
+    .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .badge-best { background: var(--color-success); color: white; }
+    .badge-popular { background: var(--color-primary); color: white; }
+    .product-info h3 { font-size: 0.95rem; margin-bottom: 2px; }
+    .product-info p { font-size: 0.8rem; color: var(--color-text-muted); }
+    .product-price { font-size: 1.25rem; font-weight: 700; min-width: 80px; text-align: right; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 2</span>
+    <h1>Select Best Value Product</h1>
+    <p class="task-description">Compare the streaming plans and add the best value one to your cart.</p>
+  </header>
+
+  <main class="card">
+    <h2 style="font-size:1rem; margin-bottom:12px;">Streaming Plans</h2>
+    <div class="products">
+      <div class="product-card" id="product-premium">
+        <div class="product-info">
+          <h3>StreamFit Premium <span class="badge badge-popular">Popular</span></h3>
+          <p>4K streaming, 5 screens, ad-free</p>
+        </div>
+        <div class="product-price">$19.99/mo</div>
+        <button class="btn btn-primary btn-sm" data-name="StreamFit Premium" data-price="19.99">Add to Cart</button>
+      </div>
+      <div class="product-card best-value" id="product-basic">
+        <div class="product-info">
+          <h3>StreamFit Basic <span class="badge badge-best">Best Value</span></h3>
+          <p>HD streaming, 2 screens, ad-supported</p>
+        </div>
+        <div class="product-price">$7.99/mo</div>
+        <button class="btn btn-primary btn-sm" data-name="StreamFit Basic" data-price="7.99">Add to Cart</button>
+      </div>
+      <div class="product-card" id="pro">
+        <div class="product-info">
+          <h3>StreamFit Pro</h3>
+          <p>4K streaming, 3 screens, ad-free</p>
+        </div>
+        <div class="product-price">$14.99/mo</div>
+        <button class="btn btn-primary btn-sm" data-name="StreamFit Pro" data-price="14.99">Add to Cart</button>
+      </div>
+    </div>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.querySelectorAll('.btn-sm').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        playground.submit('/api/l2-select-best-value/add-to-cart', {
+          productName: this.dataset.name,
+          price: this.dataset.price
+        }, function(resp) {
+          if (resp.success) playground.showResult(resp.message, true);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

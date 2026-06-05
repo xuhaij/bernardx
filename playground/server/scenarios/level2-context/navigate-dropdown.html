@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigate to Category — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .nav-bar {
+      display: flex; gap: 16px; padding: 12px 20px;
+      background: var(--color-surface); border-bottom: 1px solid var(--color-border);
+      margin: 0 -24px -24px; margin-bottom: 20px;
+    }
+    .nav-item {
+      position: relative; cursor: pointer; padding: 4px 8px; font-size: 0.9rem;
+    }
+    .nav-item:hover { color: var(--color-primary); }
+    .dropdown { display: none; position: absolute; top: 100%; left: 0; background: white;
+      border: 1px solid var(--color-border); border-radius: 6px; min-width: 160px;
+      box-shadow: var(--shadow); z-index: 10; }
+    .nav-item:hover .dropdown { display: block; }
+    .dropdown a { display: block; padding: 8px 12px; font-size: 0.85rem; color: var(--color-text);
+      text-decoration: none; cursor: pointer; }
+    .dropdown a:hover { background: var(--color-bg); }
+    .category-page { padding: 20px; border: 1px solid var(--color-border); border-radius: 6px;
+      display: none; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 2</span>
+    <h1>Navigate to Headphones Category</h1>
+    <p class="task-description">Use the navigation menu to find and go to the Headphones page.</p>
+  </header>
+
+  <main class="card">
+    <nav class="nav-bar">
+      <div class="nav-item">Home</div>
+      <div class="nav-item">
+        Electronics
+        <div class="dropdown">
+          <a data-cat="phones">Phones</a>
+          <a data-cat="laptops">Laptops</a>
+          <a data-cat="headphones">Headphones</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        Clothing
+        <div class="dropdown">
+          <a data-cat="mens">Men's</a>
+          <a data-cat="womens">Women's</a>
+        </div>
+      </div>
+    </nav>
+
+    <div id="category-content">
+      <h2>Welcome to the Store</h2>
+      <p>Browse our categories using the menu above.</p>
+    </div>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.querySelectorAll('.dropdown a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        var cat = this.dataset.cat;
+        playground.submit('/api/l2-navigate-dropdown/navigate', { category: cat }, function(resp) {
+          if (resp.success) {
+            document.getElementById('category-content').innerHTML =
+              '<h2>' + cat.charAt(0).toUpperCase() + cat.slice(1) + '</h2>' +
+              '<p>You are now viewing the ' + cat + ' category.</p>';
+            playground.showResult('Navigated to ' + cat, true);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

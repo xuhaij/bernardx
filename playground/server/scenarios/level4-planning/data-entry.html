@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transfer Contact Data — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .contact-card { padding: 20px; background: var(--color-bg); border-radius: 8px;
+      border: 1px solid var(--color-border); }
+    .contact-card h3 { font-size: 1rem; margin-bottom: 12px; color: var(--color-primary); }
+    .contact-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 0.9rem; }
+    .contact-row .label { font-weight: 600; min-width: 80px; color: var(--color-text-muted); }
+    .error-list { color: var(--color-error); font-size: 0.85rem; margin-top: 8px; }
+    @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 4</span>
+    <h1>Transfer Contact Data</h1>
+    <p class="task-description">Copy all information from the business card into the form on the right.</p>
+  </header>
+
+  <main class="card">
+    <div class="two-col">
+      <div class="contact-card">
+        <h3>Business Card</h3>
+        <div class="contact-row"><span class="label">Name:</span><span>Sarah Chen</span></div>
+        <div class="contact-row"><span class="label">Title:</span><span>VP of Engineering</span></div>
+        <div class="contact-row"><span class="label">Company:</span><span>TechNova Inc.</span></div>
+        <div class="contact-row"><span class="label">Email:</span><span>sarah.chen@technova.com</span></div>
+        <div class="contact-row"><span class="label">Phone:</span><span>(415) 555-0147</span></div>
+      </div>
+
+      <form id="entry-form">
+        <div class="form-group">
+          <label for="f-name">Name</label>
+          <input type="text" id="f-name" name="name" placeholder="Enter name">
+        </div>
+        <div class="form-group">
+          <label for="f-title">Title</label>
+          <input type="text" id="f-title" name="title" placeholder="Enter title">
+        </div>
+        <div class="form-group">
+          <label for="f-company">Company</label>
+          <input type="text" id="f-company" name="company" placeholder="Enter company">
+        </div>
+        <div class="form-group">
+          <label for="f-email">Email</label>
+          <input type="email" id="f-email" name="email" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+          <label for="f-phone">Phone</label>
+          <input type="tel" id="f-phone" name="phone" placeholder="Enter phone">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Contact</button>
+      </form>
+    </div>
+    <ul id="error-list" class="error-list" style="display:none;"></ul>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.getElementById('entry-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      playground.submit('/api/l4-data-entry/submit', {
+        name: document.getElementById('f-name').value.trim(),
+        title: document.getElementById('f-title').value.trim(),
+        company: document.getElementById('f-company').value.trim(),
+        email: document.getElementById('f-email').value.trim(),
+        phone: document.getElementById('f-phone').value.trim(),
+      }, function(resp) {
+        if (resp.success) {
+          playground.showResult(resp.message, true);
+          document.getElementById('error-list').style.display = 'none';
+        } else {
+          playground.showResult('Data mismatch. Check the business card carefully.', false);
+          var list = document.getElementById('error-list');
+          list.innerHTML = '';
+          resp.errors.forEach(function(err) {
+            var li = document.createElement('li');
+            li.textContent = err;
+            list.appendChild(li);
+          });
+          list.style.display = 'block';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

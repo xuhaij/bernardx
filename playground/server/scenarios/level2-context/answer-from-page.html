@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extract Data from Dashboard — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stat-card {
+      padding: 16px; border: 1px solid var(--color-border); border-radius: 6px;
+      background: var(--color-surface);
+    }
+    .stat-card h3 { font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 4px; }
+    .stat-card .value { font-size: 1.5rem; font-weight: 700; }
+    .stat-card .unit { font-size: 0.85rem; color: var(--color-text-muted); }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 2</span>
+    <h1>Extract Data from Dashboard</h1>
+    <p class="task-description">Find the Tokyo temperature in the weather dashboard and submit it.</p>
+  </header>
+
+  <main class="card">
+    <h2 style="font-size:1rem; margin-bottom:12px;">Weather Dashboard</h2>
+    <div class="dashboard">
+      <div class="stat-card">
+        <h3>New York</h3>
+        <span class="value">18</span><span class="unit">°C</span>
+        <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:4px;">Partly Cloudy</p>
+      </div>
+      <div class="stat-card">
+        <h3>London</h3>
+        <span class="value">14</span><span class="unit">°C</span>
+        <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:4px;">Rainy</p>
+      </div>
+      <div class="stat-card">
+        <h3>Tokyo</h3>
+        <span class="value">22</span><span class="unit">°C</span>
+        <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:4px;">Sunny</p>
+      </div>
+      <div class="stat-card">
+        <h3>Sydney</h3>
+        <span class="value">25</span><span class="unit">°C</span>
+        <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:4px;">Clear</p>
+      </div>
+    </div>
+
+    <form id="form">
+      <div class="form-group">
+        <label for="answer">Temperature in Tokyo (°C)</label>
+        <input type="text" id="answer" name="answer" placeholder="Type the temperature...">
+      </div>
+      <button type="submit" id="submit-btn" class="btn btn-primary">Submit Answer</button>
+    </form>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var answer = document.getElementById('answer').value.trim();
+      if (!answer) {
+        playground.showResult('Please enter the temperature.', false);
+        return;
+      }
+      playground.submit('/api/l2-answer-from-page/submit', { answer: answer }, function(resp) {
+        if (resp.success) playground.showResult(resp.message, true);
+      });
+    });
+  </script>
+</body>
+</html>

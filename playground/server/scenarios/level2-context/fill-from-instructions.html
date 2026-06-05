@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fill Form from Instructions — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 2</span>
+    <h1>Fill Form from Instructions</h1>
+    <p class="task-description">Read the instructions card below, then fill out the form with the correct values.</p>
+  </header>
+
+  <div class="card instruction-card">
+    <h2>Instructions</h2>
+    <p>Please register with the following details:</p>
+    <ul>
+      <li><strong>Full Name:</strong> Jane Smith</li>
+      <li><strong>Email:</strong> jane.smith@acme.com</li>
+      <li><strong>Department:</strong> Engineering</li>
+    </ul>
+  </div>
+
+  <main class="card">
+    <form id="form">
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input type="text" id="fullName" name="fullName" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter email">
+      </div>
+      <div class="form-group">
+        <label for="department">Department</label>
+        <select id="department" name="department">
+          <option value="">Select a department</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Sales">Sales</option>
+          <option value="Engineering">Engineering</option>
+          <option value="HR">HR</option>
+          <option value="Finance">Finance</option>
+        </select>
+      </div>
+      <button type="submit" id="submit-btn" class="btn btn-primary">Submit</button>
+    </form>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var data = {
+        fullName: document.getElementById('fullName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        department: document.getElementById('department').value
+      };
+      if (!data.fullName || !data.email || !data.department) {
+        playground.showResult('Please fill in all fields.', false);
+        return;
+      }
+      playground.submit('/api/l2-fill-from-instructions/submit', data, function(resp) {
+        if (resp.success) {
+          playground.showResult('Registration submitted!', true);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

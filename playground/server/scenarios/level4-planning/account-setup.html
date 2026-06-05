@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Account Setup — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .steps { display: flex; gap: 0; margin-bottom: 24px; }
+    .step { flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; font-weight: 600;
+      border-bottom: 3px solid var(--color-border); color: var(--color-text-muted); }
+    .step.active { border-bottom-color: var(--color-primary); color: var(--color-primary); }
+    .step.done { border-bottom-color: var(--color-success); color: var(--color-success); }
+    .step-content { display: none; }
+    .step-content.active { display: block; }
+    .error-list { color: var(--color-error); font-size: 0.85rem; margin-top: 8px; }
+    .radio-group { display: flex; gap: 16px; margin-top: 4px; }
+    .radio-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 4</span>
+    <h1>Complete Account Setup</h1>
+    <p class="task-description">Register, set up your profile, and configure preferences.</p>
+  </header>
+
+  <main class="card">
+    <div class="steps">
+      <div class="step active" id="step-1">1. Account</div>
+      <div class="step" id="step-2">2. Profile</div>
+      <div class="step" id="step-3">3. Preferences</div>
+      <div class="step" id="step-4">4. Done</div>
+    </div>
+
+    <div class="step-content active" id="content-1">
+      <form id="credentials-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="Enter email">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Account</button>
+      </form>
+      <ul id="cred-errors" class="error-list" style="display:none;"></ul>
+    </div>
+
+    <div class="step-content" id="content-2">
+      <form id="profile-form">
+        <div class="form-group">
+          <label for="bio">Bio</label>
+          <textarea id="bio" name="bio" rows="3" placeholder="Tell us about yourself (min 10 characters)"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="timezone">Timezone</label>
+          <select id="timezone" name="timezone">
+            <option value="">Select timezone</option>
+            <option value="UTC-8">UTC-8 (Pacific)</option>
+            <option value="UTC-5">UTC-5 (Eastern)</option>
+            <option value="UTC+0">UTC+0 (London)</option>
+            <option value="UTC+8">UTC+8 (Beijing)</option>
+            <option value="UTC+9">UTC+9 (Tokyo)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Profile</button>
+      </form>
+      <ul id="profile-errors" class="error-list" style="display:none;"></ul>
+    </div>
+
+    <div class="step-content" id="content-3">
+      <form id="prefs-form">
+        <div class="form-group">
+          <label>Notifications</label>
+          <div class="radio-group">
+            <label><input type="checkbox" id="notifications" name="notifications"> Enable email notifications</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Theme</label>
+          <div class="radio-group">
+            <label><input type="radio" name="theme" value="light"> Light</label>
+            <label><input type="radio" name="theme" value="dark"> Dark</label>
+            <label><input type="radio" name="theme" value="auto"> Auto</label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Preferences</button>
+      </form>
+    </div>
+
+    <div class="step-content" id="content-4">
+      <div style="text-align:center; padding:24px;">
+        <h2 style="color:var(--color-success); font-size:1.2rem;">Account Created!</h2>
+        <p>Your account is fully set up and ready to go.</p>
+      </div>
+    </div>
+
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    function showStep(step) {
+      for (var i = 1; i <= 4; i++) {
+        var el = document.getElementById('step-' + i);
+        var content = document.getElementById('content-' + i);
+        el.className = 'step' + (i < step ? ' done' : i === step ? ' active' : '');
+        content.className = 'step-content' + (i === step ? ' active' : '');
+      }
+    }
+
+    function showErrors(listId, errors) {
+      var list = document.getElementById(listId);
+      list.innerHTML = '';
+      errors.forEach(function(err) {
+        var li = document.createElement('li');
+        li.textContent = err;
+        list.appendChild(li);
+      });
+      list.style.display = 'block';
+    }
+
+    document.getElementById('credentials-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      playground.submit('/api/l4-account-setup/credentials', {
+        username: document.getElementById('username').value.trim(),
+        email: document.getElementById('email').value.trim(),
+      }, function(resp) {
+        if (resp.success) { playground.showResult('Account created!', true); showStep(2); }
+        else { showErrors('cred-errors', resp.errors); }
+      });
+    });
+
+    document.getElementById('profile-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      playground.submit('/api/l4-account-setup/profile', {
+        bio: document.getElementById('bio').value,
+        timezone: document.getElementById('timezone').value,
+      }, function(resp) {
+        if (resp.success) { playground.showResult('Profile saved!', true); showStep(3); }
+        else { showErrors('profile-errors', resp.errors); }
+      });
+    });
+
+    document.getElementById('prefs-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var themeEl = document.querySelector('input[name="theme"]:checked');
+      playground.submit('/api/l4-account-setup/preferences', {
+        notifications: document.getElementById('notifications').checked,
+        theme: themeEl ? themeEl.value : '',
+      }, function(resp) {
+        if (resp.success) { playground.showResult(resp.message, true); showStep(4); }
+      });
+    });
+  </script>
+</body>
+</html>

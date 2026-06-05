@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Checkout Flow — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .steps { display: flex; gap: 0; margin-bottom: 24px; }
+    .step { flex: 1; padding: 10px; text-align: center; font-size: 0.85rem; font-weight: 600;
+      border-bottom: 3px solid var(--color-border); color: var(--color-text-muted); }
+    .step.active { border-bottom-color: var(--color-primary); color: var(--color-primary); }
+    .step.done { border-bottom-color: var(--color-success); color: var(--color-success); }
+    .step-content { display: none; }
+    .step-content.active { display: block; }
+    .product-card { display: flex; justify-content: space-between; align-items: center;
+      padding: 16px; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 12px; }
+    .summary-row { display: flex; justify-content: space-between; padding: 8px 0;
+      border-bottom: 1px solid var(--color-border); font-size: 0.9rem; }
+    .error-list { color: var(--color-error); font-size: 0.85rem; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 4</span>
+    <h1>Complete Checkout Flow</h1>
+    <p class="task-description">Add a product, enter shipping info, and place the order.</p>
+  </header>
+
+  <main class="card">
+    <div class="steps">
+      <div class="step active" id="step-1">1. Cart</div>
+      <div class="step" id="step-2">2. Shipping</div>
+      <div class="step" id="step-3">3. Confirm</div>
+      <div class="step" id="step-4">4. Done</div>
+    </div>
+
+    <div class="step-content active" id="content-1">
+      <h2 style="font-size:1rem; margin-bottom:12px;">Products</h2>
+      <div class="product-card">
+        <div>
+          <strong>Wireless Mouse</strong>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin:4px 0 0;">Ergonomic, 2.4GHz, USB receiver</p>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:1.1rem; font-weight:700;">$29.99</div>
+          <button class="btn btn-primary btn-sm" id="add-mouse" data-name="Wireless Mouse" data-price="29.99">Add to Cart</button>
+        </div>
+      </div>
+      <div class="product-card" style="opacity:0.5;">
+        <div>
+          <strong>USB-C Hub</strong>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin:4px 0 0;">7-in-1, HDMI, USB 3.0</p>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:1.1rem; font-weight:700;">$49.99</div>
+          <button class="btn btn-sm" disabled>Out of Stock</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-content" id="content-2">
+      <h2 style="font-size:1rem; margin-bottom:12px;">Shipping Information</h2>
+      <form id="shipping-form">
+        <div class="form-group">
+          <label for="ship-name">Full Name</label>
+          <input type="text" id="ship-name" name="name" placeholder="Enter full name">
+        </div>
+        <div class="form-group">
+          <label for="ship-address">Address</label>
+          <input type="text" id="ship-address" name="address" placeholder="Enter street address">
+        </div>
+        <div class="form-group">
+          <label for="ship-city">City</label>
+          <input type="text" id="ship-city" name="city" placeholder="Enter city">
+        </div>
+        <button type="submit" class="btn btn-primary">Continue to Confirmation</button>
+      </form>
+      <ul id="shipping-errors" class="error-list" style="display:none;"></ul>
+    </div>
+
+    <div class="step-content" id="content-3">
+      <h2 style="font-size:1rem; margin-bottom:12px;">Order Confirmation</h2>
+      <div id="confirm-details"></div>
+      <button class="btn btn-primary" id="place-order-btn" style="margin-top:16px;">Place Order</button>
+    </div>
+
+    <div class="step-content" id="content-4">
+      <div style="text-align:center; padding:24px;">
+        <h2 style="color:var(--color-success); font-size:1.2rem;">Order Placed!</h2>
+        <p>Thank you for your purchase.</p>
+      </div>
+    </div>
+
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    var currentStep = 1;
+    var cartData = {};
+
+    function showStep(step) {
+      currentStep = step;
+      for (var i = 1; i <= 4; i++) {
+        var el = document.getElementById('step-' + i);
+        var content = document.getElementById('content-' + i);
+        el.className = 'step' + (i < step ? ' done' : i === step ? ' active' : '');
+        content.className = 'step-content' + (i === step ? ' active' : '');
+      }
+    }
+
+    document.getElementById('add-mouse').addEventListener('click', function() {
+      cartData = { productName: this.dataset.name, price: this.dataset.price };
+      playground.submit('/api/l4-checkout-flow/add-to-cart', cartData, function(resp) {
+        if (resp.success) {
+          playground.showResult(resp.message, true);
+          showStep(2);
+        }
+      });
+    });
+
+    document.getElementById('shipping-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var data = {
+        name: document.getElementById('ship-name').value.trim(),
+        address: document.getElementById('ship-address').value.trim(),
+        city: document.getElementById('ship-city').value.trim(),
+      };
+      playground.submit('/api/l4-checkout-flow/shipping', data, function(resp) {
+        if (resp.success) {
+          playground.showResult(resp.message, true);
+          document.getElementById('confirm-details').innerHTML =
+            '<div class="summary-row"><span>Product:</span><strong>' + cartData.productName + '</strong></div>' +
+            '<div class="summary-row"><span>Price:</span><strong>$' + cartData.price + '</strong></div>' +
+            '<div class="summary-row"><span>Ship to:</span><strong>' + data.name + ', ' + data.city + '</strong></div>';
+          showStep(3);
+        } else {
+          var list = document.getElementById('shipping-errors');
+          list.innerHTML = '';
+          resp.errors.forEach(function(err) {
+            var li = document.createElement('li');
+            li.textContent = err;
+            list.appendChild(li);
+          });
+          list.style.display = 'block';
+        }
+      });
+    });
+
+    document.getElementById('place-order-btn').addEventListener('click', function() {
+      playground.submit('/api/l4-checkout-flow/place-order', {}, function(resp) {
+        if (resp.success) {
+          playground.showResult(resp.message, true);
+          showStep(4);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

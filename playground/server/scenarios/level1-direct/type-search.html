@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search for a Product — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 1</span>
+    <h1>Search for a Product</h1>
+    <p class="task-description">Use the search bar to find what you need.</p>
+  </header>
+
+  <main class="card">
+    <form id="search-form">
+      <div class="form-group">
+        <label for="search-box">Search Products</label>
+        <input type="search" id="search-box" name="query" placeholder="Search for products...">
+      </div>
+      <button type="submit" id="search-btn" class="btn btn-primary">Search</button>
+    </form>
+    <div id="result" class="result" style="display:none;"></div>
+    <ul id="search-results" style="display:none; margin-top:16px; padding-left:20px;">
+    </ul>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var query = document.getElementById('search-box').value.trim();
+      if (!query) {
+        playground.showResult('Please enter a search term.', false);
+        return;
+      }
+      playground.submit('/api/l1-type-search/search', { query: query }, function(resp) {
+        if (resp.success) {
+          playground.showResult('Found ' + resp.results.length + ' results for "' + query + '"', true);
+          var list = document.getElementById('search-results');
+          list.innerHTML = '';
+          resp.results.forEach(function(item) {
+            var li = document.createElement('li');
+            li.textContent = item;
+            list.appendChild(li);
+          });
+          list.style.display = 'block';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

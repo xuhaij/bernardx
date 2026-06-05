@@ -1,0 +1,13 @@
+.vscode
+.devcontainer
+.claude
+node_modules
+build/
+.cache
+.deps
+3rd/
+*.exe
+*.dll
+*.so
+*.lib
+*.exp

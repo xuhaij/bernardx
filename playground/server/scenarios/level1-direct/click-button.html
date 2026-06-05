@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click the Submit Button — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 1</span>
+    <h1>Click the Submit Button</h1>
+    <p class="task-description">Fill in the form with a name and click the Submit button.</p>
+  </header>
+
+  <main class="card">
+    <form id="form">
+      <div class="form-group">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="Enter your name">
+      </div>
+      <button type="submit" id="submit-btn" class="btn btn-primary">Submit</button>
+    </form>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var name = document.getElementById('name').value.trim();
+      if (!name) {
+        playground.showResult('Please enter your name first.', false);
+        return;
+      }
+      playground.submit('/api/l1-click-button/submit', { name: name }, function(resp) {
+        if (resp.success) {
+          playground.showResult('Hello, ' + name + '! Form submitted successfully.', true);
+          document.title = 'Task Completed: ' + name;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

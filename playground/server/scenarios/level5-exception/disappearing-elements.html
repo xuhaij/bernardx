@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catch Disappearing Button — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .timer-area { text-align: center; padding: 32px; }
+    .countdown { font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; color: var(--color-text-muted); }
+    .claim-btn { font-size: 1.1rem; padding: 14px 32px; font-weight: 700; }
+    .claim-btn.hidden { display: none; }
+    .status-text { font-size: 0.9rem; color: var(--color-text-muted); margin-top: 12px; }
+    .error-list { color: var(--color-error); font-size: 0.85rem; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 5</span>
+    <h1>Catch the Disappearing Button</h1>
+    <p class="task-description">A "Claim Reward" button appears for 5 seconds then disappears for 8 seconds. Click it while it's visible!</p>
+  </header>
+
+  <main class="card">
+    <div class="timer-area">
+      <div class="countdown" id="countdown">--</div>
+      <button class="btn btn-primary claim-btn hidden" id="claim-btn">Claim Reward</button>
+      <div class="status-text" id="status">Waiting for button to appear...</div>
+    </div>
+    <ul id="error-list" class="error-list" style="display:none;"></ul>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    var VISIBLE_DURATION = 5000;
+    var HIDDEN_DURATION = 8000;
+    var btnVisible = false;
+    var timer = null;
+
+    function showButton() {
+      btnVisible = true;
+      document.getElementById('claim-btn').classList.remove('hidden');
+      document.getElementById('status').textContent = 'Button is visible! Click it now!';
+      document.getElementById('status').style.color = 'var(--color-success)';
+      var remaining = VISIBLE_DURATION / 1000;
+      document.getElementById('countdown').textContent = remaining + 's';
+      var countdownInterval = setInterval(function() {
+        remaining--;
+        if (remaining > 0) {
+          document.getElementById('countdown').textContent = remaining + 's';
+        } else {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+      timer = setTimeout(hideButton, VISIBLE_DURATION);
+    }
+
+    function hideButton() {
+      btnVisible = false;
+      document.getElementById('claim-btn').classList.add('hidden');
+      document.getElementById('status').textContent = 'Button is hidden. Wait for it...';
+      document.getElementById('status').style.color = 'var(--color-text-muted)';
+      var remaining = HIDDEN_DURATION / 1000;
+      document.getElementById('countdown').textContent = remaining + 's';
+      var countdownInterval = setInterval(function() {
+        remaining--;
+        if (remaining > 0) {
+          document.getElementById('countdown').textContent = remaining + 's';
+        } else {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+      timer = setTimeout(showButton, HIDDEN_DURATION);
+    }
+
+    document.getElementById('claim-btn').addEventListener('click', function() {
+      playground.submit('/api/l5-disappearing-elements/claim', {
+        visible: btnVisible ? 'true' : 'false'
+      }, function(resp) {
+        if (resp.success) {
+          playground.showResult(resp.message, true);
+          clearTimeout(timer);
+          document.getElementById('countdown').textContent = 'Claimed!';
+          document.getElementById('status').textContent = 'Reward claimed successfully!';
+          document.getElementById('claim-btn').disabled = true;
+        } else {
+          playground.showResult(resp.errors[0], false);
+        }
+      });
+    });
+
+    setTimeout(showButton, 3000);
+  </script>
+</body>
+</html>

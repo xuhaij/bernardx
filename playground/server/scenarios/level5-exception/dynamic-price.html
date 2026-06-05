@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buy at the Right Price — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .price-display { text-align: center; padding: 24px; }
+    .product-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+    .price { font-size: 2.5rem; font-weight: 800; margin: 12px 0; transition: color 0.3s; }
+    .price.high { color: var(--color-error); }
+    .price.low { color: var(--color-success); }
+    .threshold { font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 16px; }
+    .error-list { color: var(--color-error); font-size: 0.85rem; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 5</span>
+    <h1>Buy at the Right Price</h1>
+    <p class="task-description">The price changes every few seconds. Wait until it drops below $30, then click Buy.</p>
+  </header>
+
+  <main class="card">
+    <div class="price-display">
+      <div class="product-name">Wireless Earbuds Pro</div>
+      <div class="price high" id="price">$--.--</div>
+      <div class="threshold">Target: Buy when price &lt; $30.00</div>
+      <button class="btn btn-primary" id="buy-btn">Buy Now</button>
+    </div>
+    <ul id="error-list" class="error-list" style="display:none;"></ul>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    var currentPrice = 50 + Math.random() * 50;
+    var priceEl = document.getElementById('price');
+
+    function updatePrice() {
+      var change = (Math.random() - 0.5) * 30;
+      currentPrice = Math.max(10, Math.min(100, currentPrice + change));
+      priceEl.textContent = '$' + currentPrice.toFixed(2);
+      priceEl.className = 'price ' + (currentPrice < 30 ? 'low' : 'high');
+    }
+
+    priceEl.textContent = '$' + currentPrice.toFixed(2);
+    setInterval(updatePrice, 3000);
+
+    document.getElementById('buy-btn').addEventListener('click', function() {
+      playground.submit('/api/l5-dynamic-price/buy', {
+        price: currentPrice.toFixed(2),
+      }, function(resp) {
+        if (resp.success) {
+          playground.showResult(resp.message, true);
+          document.getElementById('buy-btn').disabled = true;
+          document.getElementById('error-list').style.display = 'none';
+        } else {
+          playground.showResult(resp.errors[0], false);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "type": "Sequence",
+  "name": "完整示例",
+  "sensors": [
+    {
+      "path": "sensors/hp_sensor.lua",
+      "args": { "interval": 500, "max_checks": 5, "hp_threshold": 50 }
+    }
+  ],
+  "children": [
+    {
+      "type": "Script",
+      "name": "初始化黑板",
+      "path": "scripts/hello.lua"
+    },
+    {
+      "type": "Script",
+      "name": "修改黑板数据",
+      "path": "scripts/wait_a_bit.lua"
+    },
+    {
+      "type": "Script",
+      "name": "读取黑板数据",
+      "path": "scripts/goodbye.lua"
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organize Files — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .file-manager { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .file-list { display: flex; flex-direction: column; gap: 6px; }
+    .file-item { display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.9rem; }
+    .file-item .ext { color: var(--color-text-muted); font-size: 0.8rem; }
+    .file-item .location { color: var(--color-primary); font-size: 0.8rem; font-weight: 600; }
+    .folder-section { padding: 12px; background: var(--color-bg); border-radius: 6px; }
+    .folder-chip { display: inline-block; padding: 4px 10px; margin: 4px;
+      background: var(--color-primary); color: white; border-radius: 12px; font-size: 0.8rem; }
+    .move-controls { display: flex; gap: 6px; align-items: center; }
+    .move-controls select { font-size: 0.8rem; padding: 2px 4px; }
+    .error-list { color: var(--color-error); font-size: 0.85rem; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 4</span>
+    <h1>Organize Files</h1>
+    <p class="task-description">Create folders and move each file to the right folder based on its type.</p>
+  </header>
+
+  <main class="card">
+    <div class="file-manager">
+      <div>
+        <h2 style="font-size:1rem; margin-bottom:12px;">Files</h2>
+        <div id="file-list" class="file-list"></div>
+      </div>
+      <div class="folder-section">
+        <h2 style="font-size:1rem; margin-bottom:12px;">Folders</h2>
+        <div id="folder-list"></div>
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <input type="text" id="new-folder-name" placeholder="Folder name" style="flex:1;">
+          <button class="btn btn-primary btn-sm" id="create-folder-btn">Create</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px; text-align:center;">
+      <button class="btn btn-primary" id="finish-btn">Finish Organizing</button>
+    </div>
+    <ul id="error-list" class="error-list" style="display:none;"></ul>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    var files = {
+      'report.pdf': null, 'photo.png': null, 'notes.txt': null,
+      'logo.jpg': null, 'invoice.pdf': null, 'banner.png': null
+    };
+    var folders = [];
+
+    function render() {
+      var fileList = document.getElementById('file-list');
+      fileList.innerHTML = '';
+      Object.keys(files).forEach(function(f) {
+        var ext = f.split('.').pop().toUpperCase();
+        var loc = files[f] ? files[f] : 'Unsorted';
+        var div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerHTML = '<div><strong>' + f + '</strong> <span class="ext">(' + ext + ')</span></div>' +
+          '<div class="move-controls">' +
+          '<span class="location">' + loc + '</span>' +
+          '<select class="move-select" data-file="' + f + '">' +
+          '<option value="">Move to...</option>' +
+          folders.map(function(folder) {
+            return '<option value="' + folder + '">' + folder + '</option>';
+          }).join('') +
+          '</select></div>';
+        fileList.appendChild(div);
+      });
+
+      fileList.querySelectorAll('.move-select').forEach(function(sel) {
+        sel.addEventListener('change', function() {
+          if (!this.value) return;
+          var fileName = this.dataset.file;
+          playground.submit('/api/l4-file-management/move-file', {
+            fileName: fileName, targetFolder: this.value
+          }, function(resp) {
+            if (resp.success) {
+              files[fileName] = resp.message.match(/"([^"]+)"/g)[1].replace(/"/g, '');
+              render();
+              playground.showResult(resp.message, true);
+            } else {
+              playground.showResult(resp.errors[0], false);
+            }
+          });
+        });
+      });
+
+      var folderList = document.getElementById('folder-list');
+      folderList.innerHTML = '';
+      if (folders.length === 0) {
+        folderList.innerHTML = '<span style="color:var(--color-text-muted); font-size:0.85rem;">No folders yet</span>';
+      } else {
+        folders.forEach(function(f) {
+          var chip = document.createElement('span');
+          chip.className = 'folder-chip';
+          chip.textContent = f;
+          folderList.appendChild(chip);
+        });
+      }
+    }
+
+    document.getElementById('create-folder-btn').addEventListener('click', function() {
+      var name = document.getElementById('new-folder-name').value.trim();
+      if (!name) return;
+      playground.submit('/api/l4-file-management/create-folder', { name: name }, function(resp) {
+        if (resp.success) {
+          folders.push(name);
+          document.getElementById('new-folder-name').value = '';
+          render();
+          playground.showResult(resp.message, true);
+        } else {
+          playground.showResult(resp.errors[0], false);
+        }
+      });
+    });
+
+    document.getElementById('finish-btn').addEventListener('click', function() {
+      playground.submit('/api/l4-file-management/finish', {}, function(resp) {
+        if (resp.success) {
+          playground.showResult(resp.message, true);
+        } else {
+          var list = document.getElementById('error-list');
+          list.innerHTML = '';
+          resp.errors.forEach(function(err) {
+            var li = document.createElement('li');
+            li.textContent = err;
+            list.appendChild(li);
+          });
+          list.style.display = 'block';
+        }
+      });
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Best Laptop Under Budget — BernardX Playground</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .products { display: flex; flex-direction: column; gap: 12px; }
+    .product-card {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px; border: 1px solid var(--color-border); border-radius: 6px;
+    }
+    .product-info h3 { font-size: 0.95rem; margin-bottom: 4px; }
+    .specs { font-size: 0.8rem; color: var(--color-text-muted); }
+    .product-price { font-size: 1.25rem; font-weight: 700; min-width: 80px; text-align: right; }
+  </style>
+</head>
+<body>
+  <header class="scenario-header">
+    <span class="level-badge">Level 3</span>
+    <h1>Best Laptop Under Budget</h1>
+    <p class="task-description">Find the best laptop within $800. Compare specs and price.</p>
+  </header>
+
+  <main class="card">
+    <h2 style="font-size:1rem; margin-bottom:12px;">Available Laptops</h2>
+    <div class="products">
+      <div class="product-card">
+        <div class="product-info">
+          <h3>BudgetBook 14</h3>
+          <p class="specs">14" | 8GB RAM | 256GB SSD | Intel i3</p>
+        </div>
+        <div class="product-price">$399</div>
+        <button class="btn btn-primary btn-sm" data-name="BudgetBook 14" data-price="399">Add to Cart</button>
+      </div>
+      <div class="product-card">
+        <div class="product-info">
+          <h3>TechBook Air 15</h3>
+          <p class="specs">15.6" | 16GB RAM | 512GB SSD | AMD Ryzen 7</p>
+        </div>
+        <div class="product-price">$699</div>
+        <button class="btn btn-primary btn-sm" data-name="TechBook Air 15" data-price="699">Add to Cart</button>
+      </div>
+      <div class="product-card">
+        <div class="product-info">
+          <h3>ProStation 16</h3>
+          <p class="specs">16" | 32GB RAM | 1TB SSD | Intel i9</p>
+        </div>
+        <div class="product-price">$1299</div>
+        <button class="btn btn-primary btn-sm" data-name="ProStation 16" data-price="1299">Add to Cart</button>
+      </div>
+      <div class="product-card">
+        <div class="product-info">
+          <h3>UltraSlim 13</h3>
+          <p class="specs">13.3" | 8GB RAM | 512GB SSD | Intel i5</p>
+        </div>
+        <div class="product-price">$749</div>
+        <button class="btn btn-primary btn-sm" data-name="UltraSlim 13" data-price="749">Add to Cart</button>
+      </div>
+    </div>
+    <div id="result" class="result" style="display:none;"></div>
+  </main>
+
+  <script src="/js/playground-client.js"></script>
+  <script>
+    document.querySelectorAll('.btn-sm').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        playground.submit('/api/l3-price-compare/add-to-cart', {
+          productName: this.dataset.name,
+          price: this.dataset.price
+        }, function(resp) {
+          if (resp.success) playground.showResult(resp.message, true);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
