@@ -1,7 +1,5 @@
 local ca = require("common_action")
-
 print("===== 最简测试 =====")
-
 -- 连接 Nd
 print("[1] Nd.connect...")
 local ok = false
