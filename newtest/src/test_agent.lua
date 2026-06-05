@@ -1,5 +1,8 @@
 --- AI Agent 操控手机：打开 Google 并登录
--- 需要环境变量: ANTHROPIC_BASE_URL, ANTHROPIC_AUTH_TOKEN, GOOGLE_EMAIL, GOOGLE_PASSWORD
+-- 配置在 newtest/.env 里
+
+require("env").load(".env")
+
 local init = require("libs.init")
 local ai = require("ai")
 local harness = require("agent")
